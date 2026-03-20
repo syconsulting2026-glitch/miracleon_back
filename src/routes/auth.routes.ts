@@ -21,6 +21,7 @@ r.get("/admin/hash", async (req, res) => {
 });
 r.post("/admin/login", async (req, res) => {
   const parsed = adminLoginSchema.safeParse(req.body);
+  console.log(parsed);
   if (!parsed.success) return res.status(400).json({ message: "Invalid body" });
 
   const { adminId, password } = parsed.data;
