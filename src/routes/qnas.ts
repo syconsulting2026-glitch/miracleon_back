@@ -62,7 +62,7 @@ const answerSchema = z.object({
 function toQnaListItem(qna: Qna & { answer?: QnaAnswer | null }) {
   return {
     id: qna.id,
-    title: qna.title,
+    title: qna.title, 
     authorName: qna.authorName,
     isSecret: qna.isSecret,
     views: qna.views,
