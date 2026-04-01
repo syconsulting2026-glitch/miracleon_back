@@ -175,7 +175,7 @@ router.get(
             sortOrder: slide.sortOrder,
             title: slide.title,
             description: slide.description,
-            imageUrl: `http://113.131.151.103:8080${slide.imageUrl}`,
+            imageUrl: `${slide.imageUrl}`,
             imageName: slide.imageName,
             fontSize: slide.fontSize,
             fontColor: slide.fontColor,
@@ -337,7 +337,7 @@ router.post(
           const uploadedFile = fileMap.get(index);
 
           const imageUrl = uploadedFile
-            ? `/uploads/site-banners/${uploadedFile.filename}`
+            ? `https://miracleon.s3.ap-northeast-2.amazonaws.com/uploads/site-banners/${uploadedFile.filename}`
             : slide.existingImageUrl ?? null;
 
           const imageName = uploadedFile

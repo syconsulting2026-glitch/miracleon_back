@@ -389,7 +389,7 @@ r.put(
               originalName: file.originalname,
               storedName: file.filename,
               filePath: file.path,
-              fileUrl: `/uploads/notices/${file.filename}`,
+              fileUrl: `https://miracleon.s3.ap-northeast-2.amazonaws.com/uploads/notices/${file.filename}`,
               mimeType: file.mimetype,
               fileSize: file.size,
               fileType: classifyFileType(file.mimetype),

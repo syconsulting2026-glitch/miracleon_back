@@ -60,7 +60,7 @@ SiteContentPage.init(
     category: {
       type: DataTypes.ENUM("UNBOX소개", "설립목적", "주요사업", "철학가치관"),
       allowNull: false,
-      unique: true,
+      //unique: true,
       comment: "콘텐츠 카테고리",
     },
     isActive: {

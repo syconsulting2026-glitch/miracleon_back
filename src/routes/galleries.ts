@@ -267,7 +267,7 @@ r.post(
             originalName: file.originalname,
             storedName: file.filename,
             filePath: file.path,
-            fileUrl: `/uploads/galleries/${file.filename}`,
+            fileUrl: `https://miracleon.s3.ap-northeast-2.amazonaws.com/uploads/galleries/${file.filename}`,
             sortOrder: index,
             isThumbnail: index === thumbnailIndex,
           })),

@@ -97,7 +97,7 @@ const ANIMATION_VALUES: AnimationType[] = [
   "zoomIn",
 ];
 
-const API_BASE_URL = process.env.API_BASE_URL || "http://113.131.151.103:8080";
+const API_BASE_URL = process.env.API_BASE_URL || "https://miracleon.s3.ap-northeast-2.amazonaws.com";
 
 function isValidCategory(value: unknown): value is ContentCategory {
   return typeof value === "string" && CATEGORY_VALUES.includes(value as ContentCategory);
@@ -144,7 +144,7 @@ function normalizeTheme(value: unknown): CtaTheme | null {
 }
 
 function toUploadedFileUrl(filename: string) {
-  return `/uploads/site-contents/${filename}`;
+  return `https://miracleon.s3.ap-northeast-2.amazonaws.com/uploads/site-contents/${filename}`;
 }
 
 function toAbsoluteFileUrl(filePath: string | null) {
