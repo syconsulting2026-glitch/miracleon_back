@@ -250,20 +250,20 @@ router.get("/", async (_req: Request, res: Response): Promise<void> => {
         items:
           section.sectionType === "cardGrid"
             ? (section.cardItems ?? []).map((item) => ({
-                id: item.id,
-                sectionId: item.sectionId,
-                sortOrder: item.sortOrder,
-                title: item.title,
-                description: item.description,
-                iconUrl: toAbsoluteFileUrl(item.iconUrl),
-                iconName: item.iconName,
-                titleColor: item.titleColor,
-                descriptionColor: item.descriptionColor,
-                cardBgColor: item.cardBgColor,
-                isActive: item.isActive,
-                createdAt: item.createdAt,
-                updatedAt: item.updatedAt,
-              }))
+              id: item.id,
+              sectionId: item.sectionId,
+              sortOrder: item.sortOrder,
+              title: item.title,
+              description: item.description,
+              iconUrl: toAbsoluteFileUrl(item.iconUrl),
+              iconName: item.iconName,
+              titleColor: item.titleColor,
+              descriptionColor: item.descriptionColor,
+              cardBgColor: item.cardBgColor,
+              isActive: item.isActive,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            }))
             : [],
       })),
     }));
@@ -331,7 +331,7 @@ router.post(
         return;
       }
 
-      const uploadedFiles = getUploadedFileMap(req.files as Express.Multer.File[]);
+      const uploadedFiles = getUploadedFileMap(req.files as Express.MulterS3.File[]);
 
       let page = await SiteContentPage.findOne({
         where: { category },
@@ -387,10 +387,10 @@ router.post(
           return;
         }
 
-        const sectionImageFile = uploadedFiles.get(`sectionImage_${sectionIndex}`);
+        const sectionImageFile = uploadedFiles.get(`sectionImage_${sectionIndex}`) as Express.MulterS3.File | undefined;
 
         const imageUrl = sectionImageFile
-          ? toUploadedFileUrl(sectionImageFile.filename)
+          ? sectionImageFile.location // S3 전체 URL (https://...)
           : normalizeString(rawSection.existingImageUrl);
 
         const imageName = sectionImageFile
@@ -444,10 +444,10 @@ router.post(
             const rawItem = rawSection.items[itemIndex];
             const iconFile = uploadedFiles.get(
               `sectionCardIcon_${sectionIndex}_${itemIndex}`
-            );
+            ) as Express.MulterS3.File | undefined;
 
             const iconUrl = iconFile
-              ? toUploadedFileUrl(iconFile.filename)
+              ? iconFile.location // S3 전체 URL
               : normalizeString(rawItem.existingIconUrl);
 
             const iconName = iconFile

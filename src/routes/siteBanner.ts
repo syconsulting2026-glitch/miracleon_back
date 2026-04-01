@@ -296,7 +296,7 @@ router.post(
         }
       }
 
-      const uploadedFiles = (req.files as Express.Multer.File[]) || [];
+      const uploadedFiles = (req.files as Express.MulterS3.File[]) || [];
 
       const fileMap = new Map<number, Express.Multer.File>();
       for (const file of uploadedFiles) {
@@ -334,10 +334,10 @@ router.post(
         });
 
         const slideCreatePayload = slides.map((slide, index) => {
-          const uploadedFile = fileMap.get(index);
+        const uploadedFile = fileMap.get(index) as Express.MulterS3.File | undefined;
 
           const imageUrl = uploadedFile
-            ? `https://miracleon.s3.ap-northeast-2.amazonaws.com/uploads/site-banners/${uploadedFile.filename}`
+            ? `${uploadedFile.location}`
             : slide.existingImageUrl ?? null;
 
           const imageName = uploadedFile

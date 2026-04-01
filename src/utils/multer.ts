@@ -1,7 +1,7 @@
 import multer from "multer";
 import multerS3 from "multer-s3";
 import path from "path";
-import { S3Client } from "@aws-sdk/client-s3";
+import { S3Client,DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 // 1. S3 클라이언트 설정
 const s3 = new S3Client({
@@ -100,3 +100,16 @@ export const galleryUpload = multer({
   fileFilter: imageOnlyFileFilter,
   limits: { fileSize: 30 * 1024 * 1024, files: 20 },
 });
+
+export async function deleteS3File(fileKey?: string | null) {
+  if (!fileKey) return;
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: fileKey,
+    });
+    await s3.send(command);
+  } catch (err) {
+    console.error("S3 파일 삭제 실패:", fileKey, err);
+  }
+}
