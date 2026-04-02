@@ -8,7 +8,7 @@ import { siteContentUpload } from "../utils/multer";
 const router = Router();
 
 type ContentCategory =
-  | "UNBOX소개"
+  | "미라클온소개"
   | "설립목적"
   | "주요사업"
   | "철학가치관";
@@ -74,7 +74,7 @@ type SaveContentSectionPayload = {
 };
 
 const CATEGORY_VALUES: ContentCategory[] = [
-  "UNBOX소개",
+  "미라클온소개",
   "설립목적",
   "주요사업",
   "철학가치관",
