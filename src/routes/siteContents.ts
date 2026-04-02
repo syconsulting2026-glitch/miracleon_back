@@ -57,7 +57,7 @@ type SaveContentSectionPayload = {
   layout?: ImageLayout | null;
 
   buttonText?: string | null;
-  buttonLink?: string | null;
+  buttonLink?: string | null; 
   buttonTextColor?: string | null;
   buttonBgColor?: string | null;
 
