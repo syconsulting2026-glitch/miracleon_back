@@ -8,7 +8,7 @@ import { siteContentUpload } from "../utils/multer";
 const router = Router();
 
 type ContentCategory =
-  | "UNBOX소개"
+  | "미라클온소개"
   | "설립목적"
   | "주요사업"
   | "철학가치관";
@@ -57,7 +57,7 @@ type SaveContentSectionPayload = {
   layout?: ImageLayout | null;
 
   buttonText?: string | null;
-  buttonLink?: string | null;
+  buttonLink?: string | null; 
   buttonTextColor?: string | null;
   buttonBgColor?: string | null;
 
@@ -65,7 +65,7 @@ type SaveContentSectionPayload = {
 
   pcColumns?: number | null;
   tabletColumns?: number | null;
-  mobileColumns?: number | null;
+  mobileColumns?: number | null; 
 
   rowGap?: number | null;
   columnGap?: number | null;
@@ -74,7 +74,7 @@ type SaveContentSectionPayload = {
 };
 
 const CATEGORY_VALUES: ContentCategory[] = [
-  "UNBOX소개",
+  "미라클온소개",
   "설립목적",
   "주요사업",
   "철학가치관",
@@ -97,7 +97,7 @@ const ANIMATION_VALUES: AnimationType[] = [
   "zoomIn",
 ];
 
-const API_BASE_URL = process.env.API_BASE_URL || "http://113.131.151.103:8080";
+const API_BASE_URL = process.env.API_BASE_URL || "https://miracleon.s3.ap-northeast-2.amazonaws.com";
 
 function isValidCategory(value: unknown): value is ContentCategory {
   return typeof value === "string" && CATEGORY_VALUES.includes(value as ContentCategory);
@@ -144,7 +144,7 @@ function normalizeTheme(value: unknown): CtaTheme | null {
 }
 
 function toUploadedFileUrl(filename: string) {
-  return `/uploads/site-contents/${filename}`;
+  return `https://miracleon.s3.ap-northeast-2.amazonaws.com/uploads/site-contents/${filename}`;
 }
 
 function toAbsoluteFileUrl(filePath: string | null) {
@@ -250,20 +250,20 @@ router.get("/", async (_req: Request, res: Response): Promise<void> => {
         items:
           section.sectionType === "cardGrid"
             ? (section.cardItems ?? []).map((item) => ({
-                id: item.id,
-                sectionId: item.sectionId,
-                sortOrder: item.sortOrder,
-                title: item.title,
-                description: item.description,
-                iconUrl: toAbsoluteFileUrl(item.iconUrl),
-                iconName: item.iconName,
-                titleColor: item.titleColor,
-                descriptionColor: item.descriptionColor,
-                cardBgColor: item.cardBgColor,
-                isActive: item.isActive,
-                createdAt: item.createdAt,
-                updatedAt: item.updatedAt,
-              }))
+              id: item.id,
+              sectionId: item.sectionId,
+              sortOrder: item.sortOrder,
+              title: item.title,
+              description: item.description,
+              iconUrl: toAbsoluteFileUrl(item.iconUrl),
+              iconName: item.iconName,
+              titleColor: item.titleColor,
+              descriptionColor: item.descriptionColor,
+              cardBgColor: item.cardBgColor,
+              isActive: item.isActive,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            }))
             : [],
       })),
     }));
@@ -331,7 +331,7 @@ router.post(
         return;
       }
 
-      const uploadedFiles = getUploadedFileMap(req.files as Express.Multer.File[]);
+      const uploadedFiles = getUploadedFileMap(req.files as Express.MulterS3.File[]);
 
       let page = await SiteContentPage.findOne({
         where: { category },
@@ -387,10 +387,10 @@ router.post(
           return;
         }
 
-        const sectionImageFile = uploadedFiles.get(`sectionImage_${sectionIndex}`);
+        const sectionImageFile = uploadedFiles.get(`sectionImage_${sectionIndex}`) as Express.MulterS3.File | undefined;
 
         const imageUrl = sectionImageFile
-          ? toUploadedFileUrl(sectionImageFile.filename)
+          ? sectionImageFile.location // S3 전체 URL (https://...)
           : normalizeString(rawSection.existingImageUrl);
 
         const imageName = sectionImageFile
@@ -444,10 +444,10 @@ router.post(
             const rawItem = rawSection.items[itemIndex];
             const iconFile = uploadedFiles.get(
               `sectionCardIcon_${sectionIndex}_${itemIndex}`
-            );
+            ) as Express.MulterS3.File | undefined;
 
             const iconUrl = iconFile
-              ? toUploadedFileUrl(iconFile.filename)
+              ? iconFile.location // S3 전체 URL
               : normalizeString(rawItem.existingIconUrl);
 
             const iconName = iconFile

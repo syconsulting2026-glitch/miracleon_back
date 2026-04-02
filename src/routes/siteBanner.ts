@@ -8,7 +8,7 @@ const router = Router();
 
 type BannerCategory =
   | "메인"
-  | "UNBOX소개"
+  | "미라클온소개"
   | "설립목적"
   | "주요사업"
   | "철학가치관"
@@ -41,7 +41,7 @@ interface SaveBannerSlideBody {
 
 const VALID_CATEGORIES: BannerCategory[] = [
   "메인",
-  "UNBOX소개",
+  "미라클온소개",
   "설립목적",
   "주요사업",
   "철학가치관",
@@ -175,7 +175,7 @@ router.get(
             sortOrder: slide.sortOrder,
             title: slide.title,
             description: slide.description,
-            imageUrl: `http://113.131.151.103:8080${slide.imageUrl}`,
+            imageUrl: `${slide.imageUrl}`,
             imageName: slide.imageName,
             fontSize: slide.fontSize,
             fontColor: slide.fontColor,
@@ -296,7 +296,7 @@ router.post(
         }
       }
 
-      const uploadedFiles = (req.files as Express.Multer.File[]) || [];
+      const uploadedFiles = (req.files as Express.MulterS3.File[]) || [];
 
       const fileMap = new Map<number, Express.Multer.File>();
       for (const file of uploadedFiles) {
@@ -334,10 +334,10 @@ router.post(
         });
 
         const slideCreatePayload = slides.map((slide, index) => {
-          const uploadedFile = fileMap.get(index);
+        const uploadedFile = fileMap.get(index) as Express.MulterS3.File | undefined;
 
           const imageUrl = uploadedFile
-            ? `/uploads/site-banners/${uploadedFile.filename}`
+            ? `${uploadedFile.location}`
             : slide.existingImageUrl ?? null;
 
           const imageName = uploadedFile

@@ -7,7 +7,7 @@ import { Gallery } from "../models/Gallery";
 import { GalleryImage } from "../models/GalleryImage";
 import { authJwt } from "../middleware/authJwt";
 import { requireAdmin } from "../middleware/requireAdmin";
-import { galleryUpload } from "../utils/multer";
+import { deleteS3File, galleryUpload } from "../utils/multer";
 
 const r = Router();
 
@@ -229,7 +229,7 @@ r.post(
   "/",
   galleryUpload.array("images", 20),
   async (req, res) => {
-    const files = (req.files as Express.Multer.File[]) ?? [];
+    const files = (req.files as Express.MulterS3.File[]) ?? [];
 
     try {
       const parsed = createBodySchema.safeParse({
@@ -238,7 +238,8 @@ r.post(
       });
 
       if (!parsed.success) {
-        files.forEach((file) => safeUnlink(file.path));
+        // 실패 시 S3 파일 삭제
+        files.forEach((file) => deleteS3File(file.key));
         return res.status(400).json({ message: "잘못된 요청 데이터입니다." });
       }
 
@@ -265,9 +266,9 @@ r.post(
           files.map((file, index) => ({
             galleryId: gallery.id,
             originalName: file.originalname,
-            storedName: file.filename,
-            filePath: file.path,
-            fileUrl: `/uploads/galleries/${file.filename}`,
+            storedName: file.key,       // S3 Key 저장
+            filePath: file.key,         // 삭제용 Key 저장
+            fileUrl: file.location,      // 전체 URL 저장
             sortOrder: index,
             isThumbnail: index === thumbnailIndex,
           })),
@@ -328,10 +329,10 @@ r.put(
   galleryUpload.array("images", 20),
   async (req, res) => {
     const id = Number(req.params.id);
-    const newFiles = (req.files as Express.Multer.File[]) ?? [];
+    const newFiles = (req.files as Express.MulterS3.File[]) ?? [];
 
     if (!Number.isFinite(id)) {
-      newFiles.forEach((file) => safeUnlink(file.path));
+      newFiles.forEach((file) => deleteS3File(file.key));
       return res.status(400).json({ message: "잘못된 ID입니다." });
     }
 
@@ -408,9 +409,9 @@ r.put(
             newFiles.map((file, index) => ({
               galleryId: gallery.id,
               originalName: file.originalname,
-              storedName: file.filename,
-              filePath: file.path,
-              fileUrl: `/uploads/galleries/${file.filename}`,
+              storedName: file.key,
+              filePath: file.key,
+              fileUrl: file.location, // S3 URL 사용
               sortOrder: remainImages.length + index,
               isThumbnail: false,
             })),
@@ -500,7 +501,7 @@ r.put(
         return res.status(404).json({ message: "갤러리를 찾을 수 없습니다." });
       }
 
-      updated.deletedFiles.forEach((img) => safeUnlink(img.filePath));
+      updated.deletedFiles.forEach((img) => deleteS3File(img.filePath));
 
       return res.json({
         id: updated.gallery.id,
@@ -569,7 +570,7 @@ r.delete("/:id", authJwt, requireAdmin, async (req, res) => {
       return res.status(404).json({ message: "갤러리를 찾을 수 없습니다." });
     }
 
-    deletedFiles.forEach((img) => safeUnlink(img.filePath));
+    deletedFiles.forEach((img) => deleteS3File(img.filePath));
 
     return res.json({ ok: true });
   } catch (error) {

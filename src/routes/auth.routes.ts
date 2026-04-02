@@ -6,7 +6,7 @@ import { authJwt } from "../middleware/authJwt";
 import bcrypt from "bcrypt";
 const r = Router();
 
-const adminLoginSchema = z.object({
+const adminLoginSchema = z.object({ 
   adminId: z.string().min(1),
   password: z.string().min(1),
 });

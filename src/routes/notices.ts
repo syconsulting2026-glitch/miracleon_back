@@ -7,7 +7,7 @@ import { Notice } from "../models/Notice";
 import { NoticeAttachment } from "../models/NoticeAttachment";
 import { authJwt } from "../middleware/authJwt";
 import { requireAdmin } from "../middleware/requireAdmin";
-import { noticeUpload } from "../utils/multer";
+import { deleteS3File, noticeUpload } from "../utils/multer";
 
 const r = Router();
 
@@ -213,12 +213,12 @@ r.post(
   "/",
   noticeUpload.array("attachments", 5),
   async (req, res) => {
-    const files = (req.files as Express.Multer.File[]) ?? [];
+    const files = (req.files as Express.MulterS3.File[]) ?? [];
 
     try {
       const parsed = createBodySchema.safeParse(req.body);
       if (!parsed.success) {
-        files.forEach((file) => safeUnlink(file.path));
+        files.forEach((file) => deleteS3File(file.key));
         return res.status(400).json({ message: "잘못된 요청 데이터입니다." });
       }
 
@@ -244,9 +244,9 @@ r.post(
             files.map((file, index) => ({
               noticeId: notice.id,
               originalName: file.originalname,
-              storedName: file.filename,
-              filePath: file.path,
-              fileUrl: `/uploads/notices/${file.filename}`,
+              storedName: file.key,
+              filePath: file.key,
+              fileUrl: file.location,
               mimeType: file.mimetype,
               fileSize: file.size,
               fileType: classifyFileType(file.mimetype),
@@ -300,12 +300,10 @@ r.post(
  */
 r.put(
   "/:id",
-  authJwt,
-  requireAdmin,
   noticeUpload.array("attachments", 5),
   async (req, res) => {
     const id = Number(req.params.id);
-    const newFiles = (req.files as Express.Multer.File[]) ?? [];
+    const newFiles = (req.files as Express.MulterS3.File[]) ?? [];
 
     if (!Number.isFinite(id)) {
       newFiles.forEach((file) => safeUnlink(file.path));
@@ -387,9 +385,9 @@ r.put(
             newFiles.map((file, index) => ({
               noticeId: notice.id,
               originalName: file.originalname,
-              storedName: file.filename,
-              filePath: file.path,
-              fileUrl: `/uploads/notices/${file.filename}`,
+              storedName: file.key,
+              filePath: file.key, // Key 저장
+              fileUrl: file.location, // 전체 URL 저장
               mimeType: file.mimetype,
               fileSize: file.size,
               fileType: classifyFileType(file.mimetype),
@@ -454,7 +452,7 @@ r.put(
  * 삭제(관리자)
  * DELETE /notices/:id
  */
-r.delete("/:id", authJwt, requireAdmin, async (req, res) => {
+r.delete("/:id",  async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) {
     return res.status(400).json({ message: "잘못된 ID입니다." });

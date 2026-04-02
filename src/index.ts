@@ -23,6 +23,7 @@ const corsOptions: cors.CorsOptions = {
     "http://13.209.156.25",
     "http://www.miracle-on.kr",
     "http://miracle-on.kr",
+    "https://miracleon.s3.ap-northeast-2.amazonaws.com",
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
