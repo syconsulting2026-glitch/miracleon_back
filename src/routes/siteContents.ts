@@ -65,7 +65,7 @@ type SaveContentSectionPayload = {
 
   pcColumns?: number | null;
   tabletColumns?: number | null;
-  mobileColumns?: number | null;
+  mobileColumns?: number | null; 
 
   rowGap?: number | null;
   columnGap?: number | null;
